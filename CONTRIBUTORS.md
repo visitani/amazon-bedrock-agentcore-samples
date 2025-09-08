@@ -6,6 +6,7 @@
 - aristsakpinis93
 - aurbac
 - bergjaak
+- danystinson
 - dhawalkp
 - EashanKaushik
 - Grace Lang
