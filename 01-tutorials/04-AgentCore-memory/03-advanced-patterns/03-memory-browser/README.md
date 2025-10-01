@@ -107,7 +107,7 @@ Your AWS user/role needs these permissions:
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd agentcore-memory-dashboard
+cd 01-tutorials/04-AgentCore-memory/03-advanced-patterns/03-memory-browser
 
 # Install frontend dependencies (this will download ~200MB of packages)
 npm install
