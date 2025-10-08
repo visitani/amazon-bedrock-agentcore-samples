@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Database, Search, AlertCircle, CheckCircle, Loader, Layers, User, MessageCircle, X } from 'lucide-react';
+import { useState } from 'react';
+import { AlertCircle, CheckCircle, Loader, Layers, User, MessageCircle, X } from 'lucide-react';
 
 const LongTermMemoryForm = ({ onMemoryFetch, memoryConfig, availableNamespaces }) => {
   const [formData, setFormData] = useState({
@@ -321,10 +321,26 @@ const LongTermMemoryForm = ({ onMemoryFetch, memoryConfig, availableNamespaces }
                       onClick={() => handleNamespaceSelection(ns.namespace)}
                     >
                       <div className="namespace-type">
-                        <span className={`type-badge ${ns.type.toLowerCase()}`}>
-                          {ns.type === 'SEMANTIC' ? 'Facts' : 
-                           ns.type === 'USER_PREFERENCE' ? 'Preferences' : 
-                           ns.type === 'SUMMARIZATION' ? 'Summaries' : ns.type}
+                        <span className={`type-badge ${ns.type.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}>
+                          {(() => {
+                            // Standard AgentCore strategy types
+                            const standardTypes = {
+                              'SEMANTIC': 'Facts',
+                              'USER_PREFERENCE': 'Preferences',
+                              'SUMMARIZATION': 'Summaries'
+                            };
+                            
+                            // If it's a standard type, use the friendly name
+                            if (standardTypes[ns.type]) {
+                              return standardTypes[ns.type];
+                            }
+                            
+                            // For custom types, format them nicely
+                            return ns.type
+                              .split('_')
+                              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                              .join(' ');
+                          })()}
                         </span>
                       </div>
                       <div className="namespace-path">

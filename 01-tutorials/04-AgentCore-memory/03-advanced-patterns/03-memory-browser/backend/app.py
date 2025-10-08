@@ -411,7 +411,8 @@ async def get_short_term_memory(query: ShortTermMemoryQuery):
         
     except Exception as e:
         logger.error(f"Error getting short-term memory: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get short-term memory: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to get short-term memory: {clean_error}")
 
 class EventQuery(BaseModel):
     event_id: str
@@ -503,7 +504,8 @@ async def search_event_by_id(query: EventSearchQuery):
         
     except Exception as e:
         logger.error(f"Error searching for event: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to search for event: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to search for event: {clean_error}")
 
 @app.post("/api/agentcore/getEventById")
 async def get_event_by_id(query: EventQuery):
@@ -614,11 +616,13 @@ async def get_event_by_id(query: EventQuery):
                 }
             except Exception as e:
                 logger.error(f"Alternative event search failed: {e}")
-                raise HTTPException(status_code=500, detail=f"Failed to retrieve event: {str(e)}")
+                clean_error = clean_aws_error_message(str(e))
+                raise HTTPException(status_code=500, detail=f"Failed to retrieve event: {clean_error}")
                 
     except Exception as e:
         logger.error(f"Error getting event by ID: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get event: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to get event: {clean_error}")
 
 @app.post("/api/agentcore/listNamespaces")
 async def list_namespaces(query: MemoryQuery):
@@ -689,7 +693,8 @@ async def list_namespaces(query: MemoryQuery):
         
     except Exception as e:
         logger.error(f"Error listing namespaces: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to list namespaces: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to list namespaces: {clean_error}")
 
 @app.post("/api/agentcore/getLongTermMemory")
 async def get_long_term_memory(query: LongTermMemoryQuery):
@@ -821,7 +826,8 @@ async def get_long_term_memory(query: LongTermMemoryQuery):
         
     except Exception as e:
         logger.error(f"Error getting long-term memory: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get long-term memory: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to get long-term memory: {clean_error}")
 
 @app.post("/api/agentcore/getMemoryEntries")
 async def get_memory_entries(query: MemoryQuery):
@@ -912,12 +918,14 @@ async def get_memory_entries(query: MemoryQuery):
                 
         except Exception as e:
             logger.warning(f"Could not list memory records from namespace '{query.namespace}': {e}")
+            # Clean error message to avoid exposing internal details
+            clean_error = clean_aws_error_message(str(e))
             return {
                 "memories": [],
                 "total_count": 0,
                 "source": "list_memory_records",
                 "memory_id": memory_id,
-                "error": f"Failed to access namespace '{query.namespace}': {str(e)}"
+                "error": f"Failed to access namespace '{query.namespace}': {clean_error}"
             }
 
         
@@ -932,7 +940,8 @@ async def get_memory_entries(query: MemoryQuery):
         
     except Exception as e:
         logger.error(f"Error listing memory records: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to list memory records: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to list memory records: {clean_error}")
 
 class MemoryIdValidationQuery(BaseModel):
     memory_id: str
@@ -1006,7 +1015,7 @@ async def list_namespaces(query: ListNamespacesQuery):
                             "namespace": namespace,
                             "type": strategy_type,
                             "count": 0,
-                            "sample_content": f"Unable to retrieve sample: {str(e)}"
+                            "sample_content": f"Unable to retrieve sample: {clean_aws_error_message(str(e))}"
                         })
                         logger.warning(f"⚠️ Found namespace: {namespace} (type: {strategy_type}) but couldn't retrieve samples: {e}")
             
@@ -1083,7 +1092,7 @@ async def list_namespaces(query: ListNamespacesQuery):
                     "namespaces": found_namespaces,
                     "total_found": len(found_namespaces),
                     "method": "fallback_pattern_based",
-                    "message": f"Found {len(found_namespaces)} namespaces using fallback method (get_memory_strategies failed: {str(e)})"
+                    "message": f"Found {len(found_namespaces)} namespaces using fallback method (get_memory_strategies failed: {clean_aws_error_message(str(e))})"
                 }
                 
             except Exception as e2:
@@ -1092,12 +1101,13 @@ async def list_namespaces(query: ListNamespacesQuery):
                     "memory_id": memory_id,
                     "namespaces": [],
                     "total_found": 0,
-                    "error": f"Both get_memory_strategies and fallback failed: {str(e)} / {str(e2)}"
+                    "error": f"Both get_memory_strategies and fallback failed: {clean_aws_error_message(str(e))} / {clean_aws_error_message(str(e2))}"
                 }
         
     except Exception as e:
         logger.error(f"Error listing namespaces: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to list namespaces: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to list namespaces: {clean_error}")
 
 @app.post("/api/agentcore/validateMemoryId")
 async def validate_memory_id(query: MemoryIdValidationQuery):
@@ -1128,12 +1138,13 @@ async def validate_memory_id(query: MemoryIdValidationQuery):
                 "valid": False,
                 "memory_id": query.memory_id,
                 "accessible": False,
-                "message": f"Memory ID validation failed: {str(e)}"
+                "message": f"Memory ID validation failed: {clean_aws_error_message(str(e))}"
             }
         
     except Exception as e:
         logger.error(f"Error validating memory ID: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to validate memory ID: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to validate memory ID: {clean_error}")
 
 class AddMemoryEntryQuery(BaseModel):
     session_id: str
@@ -1179,7 +1190,8 @@ async def search_memory_entries(query: SearchMemoryEntriesQuery):
         }
     except Exception as e:
         logger.error(f"Error searching memory entries: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to search memory entries: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to search memory entries: {clean_error}")
 
 @app.post("/api/agentcore/listNamespaces")
 async def list_namespaces(request: dict):
@@ -1259,11 +1271,13 @@ async def list_namespaces(request: dict):
             
         except Exception as e:
             logger.error(f"Failed to get memory strategies: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to get namespaces: {str(e)}")
+            clean_error = clean_aws_error_message(str(e))
+            raise HTTPException(status_code=500, detail=f"Failed to get namespaces: {clean_error}")
         
     except Exception as e:
         logger.error(f"Error listing namespaces: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to list namespaces: {str(e)}")
+        clean_error = clean_aws_error_message(str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to list namespaces: {clean_error}")
 
 @app.get("/api/agentcore/listSessions")
 async def list_sessions():
@@ -1282,7 +1296,7 @@ async def list_sessions():
         return {
             "sessions": [],
             "total_sessions": 0,
-            "error": str(e)
+            "error": clean_aws_error_message(str(e))
         }
 
 if __name__ == "__main__":

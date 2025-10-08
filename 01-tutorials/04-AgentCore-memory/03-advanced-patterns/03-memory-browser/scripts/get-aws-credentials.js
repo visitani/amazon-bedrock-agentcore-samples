@@ -24,12 +24,15 @@ async function getTemporaryCredentials() {
     }
 
     // Get current AWS region
-    let region = 'us-east-1';
+    let region = null;
     try {
       const configOutput = execSync('aws configure get region', { encoding: 'utf8' });
-      region = configOutput.trim() || 'us-east-1';
+      region = configOutput.trim();
+      if (!region) {
+        throw new Error('No AWS region configured. Run: aws configure set region <your-region>');
+      }
     } catch (error) {
-      console.log('ℹ️  Using default region: us-east-1');
+      throw new Error('AWS region not configured. Run: aws configure set region <your-region>');
     }
 
     // Create environment variables content for frontend configuration
