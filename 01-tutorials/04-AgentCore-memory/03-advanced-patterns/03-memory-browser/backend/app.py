@@ -496,7 +496,6 @@ async def search_event_by_id(query: EventSearchQuery):
         return {
             "event": None,
             "found": False,
-            "memory_id": memory_id,
             "event_id": query.event_id,
             "error": f"Event {query.event_id} not found in searched sessions",
             "searched_combinations": len(actor_ids_to_try) * len(session_ids_to_try)
@@ -593,7 +592,6 @@ async def get_event_by_id(query: EventQuery):
                 return {
                     "event": None,
                     "found": False,
-                    "memory_id": memory_id,
                     "event_id": query.event_id,
                     "error": "Event not found"
                 }
@@ -610,7 +608,6 @@ async def get_event_by_id(query: EventQuery):
                 return {
                     "event": None,
                     "found": False,
-                    "memory_id": memory_id,
                     "event_id": query.event_id,
                     "error": "Direct event retrieval not supported. Need actor_id and session_id to search events."
                 }
@@ -924,7 +921,6 @@ async def get_memory_entries(query: MemoryQuery):
                 "memories": [],
                 "total_count": 0,
                 "source": "list_memory_records",
-                "memory_id": memory_id,
                 "error": f"Failed to access namespace '{query.namespace}': {clean_error}"
             }
 
@@ -1098,7 +1094,6 @@ async def list_namespaces(query: ListNamespacesQuery):
             except Exception as e2:
                 logger.warning(f"Fallback method also failed: {e2}")
                 return {
-                    "memory_id": memory_id,
                     "namespaces": [],
                     "total_found": 0,
                     "error": f"Both get_memory_strategies and fallback failed: {clean_aws_error_message(str(e))} / {clean_aws_error_message(str(e2))}"
