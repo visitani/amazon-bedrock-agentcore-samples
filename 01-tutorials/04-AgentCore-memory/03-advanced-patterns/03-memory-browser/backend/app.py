@@ -10,7 +10,6 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, List, Dict, Any
 import os
 import logging
-import sys
 import re
 from datetime import datetime
 from botocore.exceptions import ClientError
