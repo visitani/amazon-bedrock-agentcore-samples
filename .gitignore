@@ -229,3 +229,4 @@ lambda.zip
 ### Bedrock AgentCore ###
 .bedrock_agentcore/
 .bedrock_agentcore.yaml
+.vscode/
