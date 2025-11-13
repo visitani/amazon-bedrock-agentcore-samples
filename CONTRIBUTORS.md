@@ -11,13 +11,17 @@
 - dhawalkp
 - didhd
 - EashanKaushik
+- Fabian Rami
 - Grace Lang
+- Joshua Samuel
 - khastation
 - manchandakp
+- madhurprash
 - Meghana Ashok
 - mttanke
 - mvangara10
 - ozhn
+- Polaris Jhandi 
 - premaiyer
 - rahullks
 - rameshv29
@@ -37,9 +41,17 @@
 - Sunil Ramachandra
 - Sandeep Raveesh-Babu
 - chintanpatel-ai
+- saurabh-et-al
 - Evandro Franco
 - greg-aws
 - Frank Dallezotte
 - Omar Elkharbotly
 - Chintan Patel
 - Shreyas Subramanian
+- David Kaleko
+- sasikiran-malladi
+- sunkavar
+- joseanavarrom
+- spencer-zepelin
+- Chaitra Mathur (mchaitra007)
+- govindhi
