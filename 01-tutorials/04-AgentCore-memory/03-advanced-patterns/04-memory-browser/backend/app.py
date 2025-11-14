@@ -10,11 +10,8 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, List, Dict, Any
 import os
 import logging
-import re
 from datetime import datetime
-from botocore.exceptions import ClientError
 from bedrock_agentcore.memory import MemoryClient
-from bedrock_agentcore.memory.constants import StrategyType
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -249,7 +246,7 @@ async def get_short_term_memory(query: ShortTermMemoryQuery):
         
         short_term_memories = []
         
-        logger.info(f"� Fextching short-term memory for actor_id='{query.actor_id}', session_id='{query.session_id}'")
+        logger.info(f"Fetching short-term memory for actor_id='{query.actor_id}', session_id='{query.session_id}'")
         logger.info(f"📋 Memory ID: {memory_id}")
         logger.info(f"📋 Max results: {query.max_results}")
         
@@ -638,9 +635,9 @@ async def get_event_by_id(query: EventQuery):
         clean_error = clean_aws_error_message(str(e))
         raise HTTPException(status_code=500, detail=f"Failed to get event: {clean_error}")
 
-@app.post("/api/agentcore/listNamespaces")
-async def list_namespaces(query: MemoryQuery):
-    """List available namespaces from AgentCore Memory strategies"""
+@app.post("/api/agentcore/listNamespacesOld")
+async def list_namespaces_old(query: MemoryQuery):
+    """List available namespaces from AgentCore Memory strategies (deprecated)"""
     try:
         if not memory_client:
             raise HTTPException(status_code=503, detail="AgentCore Memory client not available")
@@ -728,7 +725,7 @@ async def get_long_term_memory(query: LongTermMemoryQuery):
         
         long_term_memories = []
         
-        logger.info(f"� Fetching loong-term memory with namespace='{query.namespace}', max_results={query.max_results}")
+        logger.info(f"Fetching long-term memory with namespace='{query.namespace}', max_results={query.max_results}")
         logger.info(f"📋 Memory ID: {memory_id}")
         logger.info(f"📋 Filters: content_type={query.content_type}, sort_by={query.sort_by}, sort_order={query.sort_order}")
         
@@ -737,17 +734,17 @@ async def get_long_term_memory(query: LongTermMemoryQuery):
             logger.info("📚 Using retrieve_memories API")
             
             # Use retrieve_memories for semantic search
-            memories = memory_client.retrieve_memories(
+            memory_results = memory_client.retrieve_memories(
                 memory_id=memory_id,
                 namespace=query.namespace,
                 query="*",  # Get all content - could be made configurable
                 top_k=query.max_results
             )
             
-            if isinstance(memories, dict) and 'memoryRecordSummaries' in memories:
-                memory_records = memories['memoryRecordSummaries']
+            if isinstance(memory_results, dict) and 'memoryRecordSummaries' in memory_results:
+                memory_records = memory_results['memoryRecordSummaries']
             else:
-                memory_records = memories if isinstance(memories, list) else []
+                memory_records = memory_results if isinstance(memory_results, list) else []
             
             if memory_records:
                 logger.info(f"✅ Found {len(memory_records)} memory records")
@@ -963,9 +960,9 @@ class ListNamespacesQuery(BaseModel):
     memory_id: str
     max_results: Optional[int] = 100
 
-@app.post("/api/agentcore/listNamespaces")
-async def list_namespaces(query: ListNamespacesQuery):
-    """List available namespaces for a given memory ID"""
+@app.post("/api/agentcore/listNamespacesV2")
+async def list_namespaces_v2(query: ListNamespacesQuery):
+    """List available namespaces for a given memory ID (v2)"""
     try:
         if not memory_client:
             raise HTTPException(status_code=503, detail="AgentCore Memory client not available")
@@ -1132,7 +1129,7 @@ async def validate_memory_id(query: MemoryIdValidationQuery):
         
         # Try to list memory records to validate the memory ID
         try:
-            memories = memory_client.list_memory_records(
+            _ = memory_client.list_memory_records(
                 memoryId=query.memory_id,
                 maxResults=1  # Just check if we can access it
             )
