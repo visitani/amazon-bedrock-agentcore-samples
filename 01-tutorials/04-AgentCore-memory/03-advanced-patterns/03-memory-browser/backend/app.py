@@ -87,13 +87,31 @@ def get_aws_region():
     
     # 2. Try to get from AWS CLI configuration
     try:
-        import subprocess
-        result = subprocess.run(['aws', 'configure', 'get', 'region'], 
-                              capture_output=True, text=True, timeout=5)
-        if result.returncode == 0 and result.stdout.strip():
-            region = result.stdout.strip()
-            logger.info(f"Using AWS region from CLI config: {region}")
-            return region
+        import subprocess  # nosec B404 - subprocess usage is necessary and properly secured
+        import shutil
+        
+        # Security: Use full path to aws executable to prevent PATH hijacking (B607)
+        aws_path = shutil.which('aws')
+        if aws_path:
+            # Security: Use list format with full path to prevent command injection (B603)
+            # Validate that aws_path is an absolute path to prevent PATH manipulation
+            if not aws_path.startswith('/'):
+                logger.warning(f"AWS CLI path is not absolute: {aws_path}, skipping")
+            else:
+                # Using validated full path and hardcoded arguments only, no user input
+                result = subprocess.run(  # nosec B603
+                    [aws_path, 'configure', 'get', 'region'],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                    check=False  # Don't raise exception on non-zero return
+                )
+                if result.returncode == 0 and result.stdout.strip():
+                    region = result.stdout.strip()
+                    logger.info(f"Using AWS region from CLI config: {region}")
+                    return region
+        else:
+            logger.debug("AWS CLI not found in PATH")
     except Exception as e:
         logger.debug(f"Could not get region from AWS CLI: {e}")
     
@@ -1295,4 +1313,13 @@ async def list_sessions():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Security: Bind to localhost only by default to prevent exposure to all network interfaces (B104)
+    # For production deployments, use a reverse proxy (nginx, ALB) and configure host via environment variable
+    host = os.getenv("BACKEND_HOST", "127.0.0.1")
+    port = int(os.getenv("BACKEND_PORT", "8000"))
+    
+    if host == "0.0.0.0":  # nosec B104 - This is a security check, not a vulnerability
+        logger.warning("⚠️  WARNING: Binding to 0.0.0.0 exposes the service to all network interfaces!")
+        logger.warning("⚠️  For production, use a reverse proxy and bind to 127.0.0.1")
+    
+    uvicorn.run(app, host=host, port=port)

@@ -136,9 +136,11 @@ The `backend/.env` file should contain:
 # AWS Configuration (region will be auto-detected from AWS CLI/profile if not set)
 # AWS_REGION=us-east-1
 
-# Server Configuration  
-HOST=0.0.0.0
-PORT=8000
+# Server Configuration
+# Security: Use 127.0.0.1 for local development (recommended)
+# Only use 0.0.0.0 if you need to access from other machines on your network
+BACKEND_HOST=127.0.0.1
+BACKEND_PORT=8000
 DEBUG=true
 
 # CORS Configuration
@@ -147,6 +149,8 @@ ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 # Optional: AWS Profile (if using multiple profiles)
 # AWS_PROFILE=your-profile-name
 ```
+
+**Security Note**: The backend now binds to `127.0.0.1` (localhost only) by default for security. This prevents exposure to all network interfaces. If you need to access the backend from other machines on your network, set `BACKEND_HOST=0.0.0.0` in your `.env` file, but be aware this exposes the service to your entire network.
 
 **Note**: AWS region is automatically detected from your AWS CLI configuration. Only set `AWS_REGION` if you need to override the default.
 
