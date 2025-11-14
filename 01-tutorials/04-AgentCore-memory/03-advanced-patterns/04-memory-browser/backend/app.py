@@ -859,7 +859,7 @@ async def get_memory_entries(query: MemoryQuery):
         all_memories = []
         
         # Use ListMemoryRecords operation to browse all records without semantic search
-        logger.info(f"🔍 Listing memory records using ListMemoryRecords operation")
+        logger.info("🔍 Listing memory records using ListMemoryRecords operation")
         logger.info(f"📋 Memory ID: {memory_id}")
         
         # AgentCore Memory typically requires a namespace for efficient queries
@@ -1210,7 +1210,7 @@ async def list_namespaces(request: dict):
             raise HTTPException(status_code=503, detail="AgentCore Memory client not available")
 
         memory_id = request.get("memory_id") or MEMORY_ID
-        max_results = request.get("max_results", 100)
+        _ = request.get("max_results", 100)  # Reserved for future use
         
         if not memory_id:
             raise HTTPException(
